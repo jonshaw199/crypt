@@ -1,3 +1,14 @@
+/*
+https://www.tutorialspoint.com/encrypt-and-decrypt-data-in-nodejs
+
+NodeJS provides inbuilt library crypto to encrypt and decrypt data in NodeJS. 
+We can use this library to encrypt data of any type. You can do the cryptographic 
+operations on a string, buffer, and even a stream of data. The crypto also holds 
+multiple crypto algorithms for encryption. Please check the official resources 
+for the same. In this article, we will use the most popular AES (Advanced 
+Encryption Standard) for encryption.
+*/
+
 import crypto from "crypto";
 
 const algorithm = "aes-256-cbc"; //Using AES encryption
