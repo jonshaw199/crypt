@@ -24,11 +24,3 @@ export function fromDir(startPath, filter, callback, recursive = true) {
 
   return resultFiles;
 }
-
-/*
-Example:
-
-fromDir('../LiteScript', /\.html$/, function(filename) {
-    console.log('-- found: ', filename);
-});
-*/

@@ -88,6 +88,7 @@ export function decryptFilesRegex(startPath, regex, key, iv, algorithm) {
 }
 
 // CLI
+// Example: node index.js -e ./ .env abc 123
 const args = process.argv;
 if (args.length > 5) {
   const flags = args[2];
