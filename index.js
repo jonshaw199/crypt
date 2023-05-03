@@ -57,6 +57,10 @@ if (args.length > 5) {
   const iv = args[6];
   const algorithm = args.length > 6 ? args[7] : null;
   const func = encrypt ? encryptFile : decryptFile;
-  const result = func(inputFilePath, outputFilePath, key, iv, algorithm);
-  console.log("result:\n" + result);
+  try {
+    const result = func(inputFilePath, outputFilePath, key, iv, algorithm);
+    console.log("result:\n" + result);
+  } catch (e) {
+    console.error(`Failed to ${encrypt ? "encrypt" : "decrypt"}; ${e}`);
+  }
 }
