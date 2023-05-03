@@ -100,7 +100,7 @@ export function decryptFilesRegex(
         return decryptFile(
           filePath,
           filePath.endsWith(ENCRYPTED_EXTENSION)
-            ? filePath.substr(0, filePath.indexOf(ENCRYPTED_EXTENSION))
+            ? filePath.substring(0, filePath.indexOf(ENCRYPTED_EXTENSION))
             : `${filePath}${DECRYPTED_EXTENSION_FALLBACK}`,
           key,
           iv,
@@ -123,8 +123,8 @@ if (args.length > 6) {
   const recursive = flags.includes("r");
   const startPath = args[3];
   const regex = new RegExp(args[4]);
-  const key = args[5].padEnd(32).substr(0, 32);
-  const iv = args[6].padEnd(16).substr(0, 16);
+  const key = args[5].padEnd(32).substring(0, 32);
+  const iv = args[6].padEnd(16).substring(0, 16);
   const func = encrypt ? encryptFilesRegex : decryptFilesRegex;
   // Use aes-256-cbc, even if DEFAULT_ALGO changes, because key and iv are sized for aes-256-cbc
   const resultFiles = func(startPath, regex, key, iv, "aes-256-cbc", recursive);
