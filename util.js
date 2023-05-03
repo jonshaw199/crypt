@@ -13,6 +13,7 @@ export function fromDir(startPath, filter, callback, recursive = true) {
       if (stat.isDirectory() && recursive) {
         resultFiles.push(...fromDir(filename, filter, callback));
       } else if (filter.test(filename)) {
+        // Callback returns true/truthy if file was encrypted/decrypted successfully
         if (callback(filename)) {
           resultFiles.push(filename);
         }

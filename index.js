@@ -98,7 +98,8 @@ if (args.length > 6) {
   const key = args[5].padEnd(32).substr(0, 32);
   const iv = args[6].padEnd(16).substr(0, 16);
   const func = encrypt ? encryptFilesRegex : decryptFilesRegex;
-  const resultFiles = func(startPath, regex, key, iv);
+  // Use aes-256-cbc, even if DEFAULT_ALGO changes, because key and iv are sized for aes-256-cbc
+  const resultFiles = func(startPath, regex, key, iv, "aes-256-cbc");
   console.log("Files processed:");
   console.log(resultFiles);
 }
