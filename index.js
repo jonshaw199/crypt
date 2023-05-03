@@ -14,34 +14,34 @@ import fs from "fs";
 
 const DEFAULT_ALGO = "aes-256-cbc";
 
-export function encryptString(text, key, iv, algorithm = DEFAULT_ALGO) {
+export function encryptText(text, key, iv, algorithm = DEFAULT_ALGO) {
   const cipher = crypto.createCipheriv(algorithm, key, iv);
   let encrypted = cipher.update(text);
   encrypted = Buffer.concat([encrypted, cipher.final()]);
   return encrypted.toString("hex");
 }
 
-export function decryptString(
-  encryptedText,
+export function decryptText(
+  encryptedHexText,
   key,
   iv,
   algorithm = DEFAULT_ALGO
 ) {
   const decipher = crypto.createDecipheriv(algorithm, key, iv);
-  let decrypted = decipher.update(Buffer.from(encryptedText, "hex"));
+  let decrypted = decipher.update(Buffer.from(encryptedHexText, "hex"));
   decrypted = Buffer.concat([decrypted, decipher.final()]);
   return decrypted.toString();
 }
 
 export function encryptFile(inputFilePath, outputFilePath, key, iv, algorithm) {
-  const str = encryptString(fs.readFileSync(inputFilePath), key, iv, algorithm);
+  const str = encryptText(fs.readFileSync(inputFilePath), key, iv, algorithm);
   fs.writeFileSync(outputFilePath, str);
   return str;
 }
 
 export function decryptFile(inputFilePath, outputFilePath, key, iv, algorithm) {
   const inputStr = fs.readFileSync(inputFilePath, "utf8");
-  const str = decryptString(inputStr, key, iv, algorithm);
+  const str = decryptText(inputStr, key, iv, algorithm);
   fs.writeFileSync(outputFilePath, str);
   return str;
 }
