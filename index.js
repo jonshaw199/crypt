@@ -40,8 +40,7 @@ export function encryptFile(inputFilePath, outputFilePath, key, iv, algorithm) {
 }
 
 export function decryptFile(inputFilePath, outputFilePath, key, iv, algorithm) {
-  const inputStr = fs.readFileSync(inputFilePath, "utf8");
-  const str = decryptText(inputStr, key, iv, algorithm);
+  const str = decryptText(fs.readFileSync(inputFilePath, "utf8"), key, iv, algorithm);
   fs.writeFileSync(outputFilePath, str);
   return str;
 }
