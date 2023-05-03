@@ -2,22 +2,27 @@ import fs from "fs";
 import path from "path";
 
 export function fromDir(startPath, filter, callback, recursive = true) {
-  if (!fs.existsSync(startPath)) {
-    console.log(`Path not found: ${startPath}`);
-    return;
-  }
+  const resultFiles = [];
 
-  const files = fs.readdirSync(startPath);
-  for (let i = 0; i < files.length; i++) {
-    const filename = path.join(startPath, files[i]);
-    const stat = fs.lstatSync(filename);
+  if (fs.existsSync(startPath)) {
+    const files = fs.readdirSync(startPath);
+    for (let i = 0; i < files.length; i++) {
+      const filename = path.join(startPath, files[i]);
+      const stat = fs.lstatSync(filename);
 
-    if (stat.isDirectory() && recursive) {
-      fromDir(filename, filter, callback);
-    } else if (filter.test(filename)) {
-      callback(filename);
+      if (stat.isDirectory() && recursive) {
+        resultFiles.push(...fromDir(filename, filter, callback));
+      } else if (filter.test(filename)) {
+        if (callback(filename)) {
+          resultFiles.push(filename);
+        }
+      }
     }
+  } else {
+    console.log(`Path not found: ${startPath}`);
   }
+
+  return resultFiles;
 }
 
 /*

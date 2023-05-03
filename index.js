@@ -11,9 +11,10 @@ Encryption Standard) for encryption.
 
 import crypto from "crypto";
 import fs from "fs";
-import { fromDir } from "./util";
+import { fromDir } from "./util.js";
 
 const DEFAULT_ALGO = "aes-256-cbc";
+const ENCRYPTED_EXTENSION = ".encrypted";
 
 export function encryptText(text, key, iv, algorithm = DEFAULT_ALGO) {
   const cipher = crypto.createCipheriv(algorithm, key, iv);
@@ -52,10 +53,18 @@ export function decryptFile(inputFilePath, outputFilePath, key, iv, algorithm) {
 }
 
 export function encryptFilesRegex(startPath, regex, key, iv, algorithm) {
-  const encryptedFiles = [];
-  fromDir(startPath, regex, (filePath) => {
+  return fromDir(startPath, regex, (filePath) => {
     try {
-      encryptedFiles.push(filePath);
+      return (
+        !filePath.includes(ENCRYPTED_EXTENSION) &&
+        encryptFile(
+          filePath,
+          `${filePath}${ENCRYPTED_EXTENSION}`,
+          key,
+          iv,
+          algorithm
+        )
+      );
     } catch (e) {
       console.error(`Failed to encrypt ${filePath}: ${e}`);
     }
@@ -63,10 +72,15 @@ export function encryptFilesRegex(startPath, regex, key, iv, algorithm) {
 }
 
 export function decryptFilesRegex(startPath, regex, key, iv, algorithm) {
-  const decryptedFiles = [];
-  fromDir(startPath, regex, (filePath) => {
+  return fromDir(startPath, regex, (filePath) => {
     try {
-      decryptedFiles.push(filePath);
+      return decryptFile(
+        filePath,
+        filePath.substr(0, filePath.indexOf(ENCRYPTED_EXTENSION)),
+        key,
+        iv,
+        algorithm
+      );
     } catch (e) {
       console.error(`Failed to decrypt ${filePath}: ${e}`);
     }
@@ -79,12 +93,11 @@ if (args.length > 5) {
   const flags = args[2];
   const encrypt = flags.includes("e");
   const startPath = args[3];
-  const regex = args[4];
-  const key = args[5];
-  const iv = args[6];
-  const algorithm = args.length > 6 ? args[7] : null;
+  const regex = new RegExp(args[4]);
+  const key = args[5].padEnd(32).substr(0, 32);
+  const iv = args[6].padEnd(16).substr(0, 16);
   const func = encrypt ? encryptFilesRegex : decryptFilesRegex;
-  const resultFiles = func(startPath, regex, key, iv, algorithm);
+  const resultFiles = func(startPath, regex, key, iv);
   console.log("Files processed:");
   console.log(resultFiles);
 }
