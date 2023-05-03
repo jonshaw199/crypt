@@ -15,6 +15,7 @@ import { fromDir } from "./util.js";
 
 const DEFAULT_ALGO = "aes-256-cbc";
 const ENCRYPTED_EXTENSION = ".encrypted";
+const DECRYPTED_EXTENSION_FALLBACK = ".decrypted";
 
 export function encryptText(text, key, iv, algorithm = DEFAULT_ALGO) {
   const cipher = crypto.createCipheriv(algorithm, key, iv);
@@ -52,39 +53,65 @@ export function decryptFile(inputFilePath, outputFilePath, key, iv, algorithm) {
   return str;
 }
 
-export function encryptFilesRegex(startPath, regex, key, iv, algorithm) {
-  return fromDir(startPath, regex, (filePath) => {
-    try {
-      return (
-        !filePath.includes(ENCRYPTED_EXTENSION) &&
-        encryptFile(
+export function encryptFilesRegex(
+  startPath,
+  regex,
+  key,
+  iv,
+  algorithm,
+  recursive
+) {
+  return fromDir(
+    startPath,
+    regex,
+    (filePath) => {
+      try {
+        return (
+          !filePath.includes(ENCRYPTED_EXTENSION) &&
+          encryptFile(
+            filePath,
+            `${filePath}${ENCRYPTED_EXTENSION}`,
+            key,
+            iv,
+            algorithm
+          )
+        );
+      } catch (e) {
+        console.error(`Failed to encrypt ${filePath}: ${e}`);
+      }
+    },
+    recursive
+  );
+}
+
+export function decryptFilesRegex(
+  startPath,
+  regex,
+  key,
+  iv,
+  algorithm,
+  recursive
+) {
+  return fromDir(
+    startPath,
+    regex,
+    (filePath) => {
+      try {
+        return decryptFile(
           filePath,
-          `${filePath}${ENCRYPTED_EXTENSION}`,
+          filePath.endsWith(ENCRYPTED_EXTENSION)
+            ? filePath.substr(0, filePath.indexOf(ENCRYPTED_EXTENSION))
+            : `${filePath}${DECRYPTED_EXTENSION_FALLBACK}`,
           key,
           iv,
           algorithm
-        )
-      );
-    } catch (e) {
-      console.error(`Failed to encrypt ${filePath}: ${e}`);
-    }
-  });
-}
-
-export function decryptFilesRegex(startPath, regex, key, iv, algorithm) {
-  return fromDir(startPath, regex, (filePath) => {
-    try {
-      return decryptFile(
-        filePath,
-        filePath.substr(0, filePath.indexOf(ENCRYPTED_EXTENSION)),
-        key,
-        iv,
-        algorithm
-      );
-    } catch (e) {
-      console.error(`Failed to decrypt ${filePath}: ${e}`);
-    }
-  });
+        );
+      } catch (e) {
+        console.error(`Failed to decrypt ${filePath}: ${e}`);
+      }
+    },
+    recursive
+  );
 }
 
 // CLI
@@ -93,13 +120,14 @@ const args = process.argv;
 if (args.length > 6) {
   const flags = args[2];
   const encrypt = flags.includes("e");
+  const recursive = flags.includes("r");
   const startPath = args[3];
   const regex = new RegExp(args[4]);
   const key = args[5].padEnd(32).substr(0, 32);
   const iv = args[6].padEnd(16).substr(0, 16);
   const func = encrypt ? encryptFilesRegex : decryptFilesRegex;
   // Use aes-256-cbc, even if DEFAULT_ALGO changes, because key and iv are sized for aes-256-cbc
-  const resultFiles = func(startPath, regex, key, iv, "aes-256-cbc");
+  const resultFiles = func(startPath, regex, key, iv, "aes-256-cbc", recursive);
   console.log("Files processed:");
   console.log(resultFiles);
 }
